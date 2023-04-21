@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: DOCKERFILE
+    image: flask-api-class-image
+    container_name: flask-api-class-container
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      FLASK_DEBUG: 1
