@@ -3,6 +3,7 @@ import redis
 from datetime import datetime
 import requests
 import mpld3
+import pickle
 from StockDataVisualizer import StockDataVisualizer
 
 
@@ -22,18 +23,16 @@ def submit():
     startdate = datetime.strptime(request.form.get('startdate'), '%Y-%m-%d')
     enddate = datetime.strptime(request.form.get('enddate'), '%Y-%m-%d')
     plot = StockDataVisualizer(symbol, chart, timeseries, startdate, enddate)
-    fig = plot.graphData()
+    # Need to convert to bytes because redis cache doesnt accept the mpld3 figure type
+    fig = pickle.dumps(plot.graphData())
     cache.set('fig', fig)
     return redirect(url_for('graph'))
 
 @app.route('/graph')
 def graph():
-    fig = cache.get('fig')
-    mpld3.fig_to_html(fig)
-    mpld3.show()
-    url = f'http://localhost:8888'
-    response = requests.get(url)
-    return response.content
+    fig = pickle.loads(cache.get('fig'))
+    html = mpld3.fig_to_html(fig)
+    return render_template('plot.html', plot_html = html  )
     
     
     
